@@ -1,7 +1,7 @@
 package timer;
 
+import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.Vector;
 
 /**
  * @author Flavien Vernier
@@ -11,34 +11,31 @@ import java.util.Vector;
 
 
 public class RandomTimer implements Timer {
-	
-	public static enum randomDistribution {
+
+	public enum randomDistribution {
 		POISSON, EXP, POSIBILIST, GAUSSIAN;
 	}
-	
-	//private static String randomDistributionString[] = {"POISSON", "EXP", "POSIBILIST", "GAUSSIAN"};
-	
+
 	private Random r = new Random();
 	private randomDistribution distribution;
 	private double rate;
 	private double mean;
 	private double lolim;
-	private double hilim; 
-	//private int width; 
-	
-	
+	private double hilim;
+
+
 	public static randomDistribution string2Distribution(String distributionName){
 		return RandomTimer.randomDistribution.valueOf(RandomTimer.randomDistribution.class, distributionName.toUpperCase());
-	}	
+	}
 	public static String distribution2String(randomDistribution distribution){
 		return distribution.name();
 	}
-	
+
 	/**
-	 * @param param constraint 
-	 * @throws Exception 
+	 * @param param constraint
+	 * @throws Exception
 	 */
-	public RandomTimer(randomDistribution distribution, double param) throws Exception{
+	public RandomTimer(randomDistribution distribution, double param) throws Throwable{
 		if(distribution == randomDistribution.EXP ){
 			this.distribution = distribution;
 			this.rate = param;
@@ -57,12 +54,12 @@ public class RandomTimer implements Timer {
 	}
 	/**
 	 * @param min/max constraint
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public RandomTimer(randomDistribution distribution, int lolim, int hilim) throws Exception{
 		if(distribution == randomDistribution.POSIBILIST || distribution == randomDistribution.GAUSSIAN){
 			this.distribution = distribution;
-			this.mean = lolim + (hilim - lolim)/2;
+			this.mean = lolim + ((double)hilim - lolim)/2;
 			this.rate = Double.NaN;
 			this.lolim = lolim;
 			this.hilim = hilim;
@@ -70,11 +67,11 @@ public class RandomTimer implements Timer {
 			throw new Exception("Bad Timer constructor for selected distribution");
 		}
 	}
-	
+
 	public String getDistribution(){
 		return this.distribution.name();
 	}
-	
+
 	public String getDistributionParam() {
 		if(distribution == randomDistribution.EXP ){
 			return "rate: " + this.rate;
@@ -83,14 +80,15 @@ public class RandomTimer implements Timer {
 		}else if(distribution == randomDistribution.POSIBILIST || distribution == randomDistribution.GAUSSIAN){
 			return "lolim: " + this.lolim + " hilim: " + this.hilim;
 		}
-		
+
 		return "null";
 	}
-	
+
 	public double getMean(){
 		return this.mean;
 	}
-	
+
+	@Override
 	public String toString(){
 		String s = this.getDistribution();
 		switch (this.distribution){
@@ -107,16 +105,16 @@ public class RandomTimer implements Timer {
 			s += " LoLim:" + this.lolim + " HiLim:" + this.hilim;
 			break;
 		}
-		
+
 		return s;
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see methodInvocator.Timer#next()
 	 */
 	@Override
-	public Integer next(){
+	public Integer next() throws NoSuchElementException{
 		switch (this.distribution){
 		case POSIBILIST :
 			return this.nextTimePosibilist();
@@ -127,60 +125,48 @@ public class RandomTimer implements Timer {
 		case GAUSSIAN :
 			return this.nextTimeGaussian();
 		}
-		return -1; // Theoretically impossible !!!
+		throw new NoSuchElementException(); // Theoretically impossible !!!
 	}
-	
-	/*
-	 * Equivalent to methodInvocator.RandomTimer#next()
-	 * 
-	 * @param since has no effect
-	 * 
-	 * @see methodInvocator.RandomTimer#next(int)
-	 */
-	/*@Override
-	public Integer next(int since){
-		return this.next();
-	}*/
-	
+
 	/**
 	 * Give good mean
-	 * Give wrong variance  
+	 * Give wrong variance
 	 */
 	private int nextTimePosibilist(){
-	    return (int)this.lolim + (int)(this.r.nextDouble() * (this.hilim - this.lolim));
+		return (int) (this.lolim + this.r.nextInt((int)(this.hilim - this.lolim+1)));
 	}
-	
+
 	/**
 	 * Give good mean
-	 * Give wrong variance  
+	 * Give wrong variance
 	 */
 	private int nextTimeExp(){
-	    return (int)(-Math.log(1.0 - this.r.nextDouble()) / this.rate);
+		return (int)(-Math.log(1.0 - this.r.nextDouble()) / this.rate);
 	}
-	
-	
+
+
 	/**
 	 * Give good mean
 	 * Give good variance
 	 */
 	private int nextTimePoisson() {
-	    
-	    double L = Math.exp(-this.mean);
-	    int k = 0;
-	    double p = 1.0;
-	    do {
-	        p = p * this.r.nextDouble();
-	        k++;
-	    } while (p > L);
-	    return k - 1;
-	}   		
-	    
-	
+
+		double l = Math.exp(-this.mean);
+		int k = 0;
+		double p = 1.0;
+		do {
+			p = p * this.r.nextDouble();
+			k++;
+		} while (p > l);
+		return k - 1;
+	}
+
+
 	private int nextTimeGaussian(){
 		return (int)this.lolim + (int)((this.r.nextGaussian() + 1.0)/2.0 * (this.hilim - this.lolim));
 	}
-	
-	
+
+
 	@Override
 	public boolean hasNext() {
 		return true;
