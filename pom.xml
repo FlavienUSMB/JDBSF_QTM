@@ -22,4 +22,8 @@
   	</dependency>
   </dependencies>
   
+  <ciManagement>
+  	<url>192.168.143.34:9000</url>
+  	<system>JenKins</system>
+  </ciManagement>
 </project>
