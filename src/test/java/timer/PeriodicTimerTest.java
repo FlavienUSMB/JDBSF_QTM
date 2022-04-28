@@ -24,11 +24,16 @@ class PeriodicTimerTest {
 	@Test
 	void testPeriodicTimerInt() {
 		assertEquals(3, this.t1.getPeriod());
+		assertEquals(3,this.t1.next());
+		assertTrue(this.t1.hasNext());
 	}
 
 	@Test
 	void testPeriodicTimerIntInt() {
 		assertEquals(2, this.t2.getPeriod());
+		assertEquals(3,this.t2.next());
+		assertEquals(2,this.t2.next());
+		assertTrue(this.t2.hasNext());
 	}
 
 }
