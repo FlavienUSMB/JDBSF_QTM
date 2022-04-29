@@ -28,12 +28,12 @@ class DiscreteActionTest {
 		assertSame(o, da.getObject());
 		assertEquals("toString", da.getMethod().getName());
 		assertNull(da.getCurrentLapsTime());
-
+		
 		da.next();
 		assertSame(o, da.getObject());
 		assertEquals("toString", da.getMethod().getName());
 		assertEquals(5, da.getCurrentLapsTime());
-
+		
 		da.spendTime(2);
 		assertSame(o, da.getObject());
 		assertEquals("toString", da.getMethod().getName());
